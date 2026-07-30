@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="3">
-    <iq:application entry="TransitWatchApp" id="7a2c9f04e1b84d3a9c6f5e8b2d4a7c19"
+    <iq:application entry="DeparturesApp" id="7a2c9f04e1b84d3a9c6f5e8b2d4a7c19"
                     launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0"
                     name="@Strings.AppName" type="watchapp" version="0.1.0">
         <iq:products>

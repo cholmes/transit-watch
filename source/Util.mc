@@ -128,7 +128,7 @@ module Util {
         var len = text.length();
         while (len > 1) {
             len -= 1;
-            var t = text.substring(0, len) + "…";
+            var t = text.substring(0, len) + "..";
             if (dc.getTextWidthInPixels(t, font) <= maxWidth) {
                 return t;
             }

@@ -8,6 +8,12 @@
     <setting propertyKey="@Properties.maxDepartures" title="@Strings.SettingMaxDepartures">
         <settingConfig type="numeric" min="3" max="15"/>
     </setting>
+    <setting propertyKey="@Properties.radiusM" title="@Strings.SettingRadius">
+        <settingConfig type="numeric" min="100" max="3000"/>
+    </setting>
+    <setting propertyKey="@Properties.hideTrains" title="@Strings.SettingHideTrains">
+        <settingConfig type="boolean"/>
+    </setting>
     <setting propertyKey="@Properties.apiBase" title="@Strings.SettingApiBase">
         <settingConfig type="alphaNumeric"/>
     </setting>

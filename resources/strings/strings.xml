@@ -1,7 +1,9 @@
 <strings>
-    <string id="AppName">TransitWatch</string>
+    <string id="AppName">Departures</string>
     <string id="SettingAlertMinutes">Default alert threshold (minutes)</string>
     <string id="SettingRefreshSeconds">Refresh interval while open (seconds)</string>
     <string id="SettingMaxDepartures">Departures to show per stop</string>
+    <string id="SettingRadius">Nearby search radius (meters)</string>
+    <string id="SettingHideTrains">Hide trains</string>
     <string id="SettingApiBase">API base URL (Transitous / MOTIS)</string>
 </strings>

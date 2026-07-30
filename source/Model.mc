@@ -67,6 +67,25 @@ module Cfg {
     function maxDepartures() {
         return num("maxDepartures", 10);
     }
+
+    function radiusM() {
+        var v = num("radiusM", 500);
+        if (v < 100) {
+            v = 100;
+        }
+        if (v > 3000) {
+            v = 3000;
+        }
+        return v;
+    }
+
+    function hideTrains() {
+        try {
+            return Application.Properties.getValue("hideTrains") == true;
+        } catch (e) {
+            return false;
+        }
+    }
 }
 
 // Favorite ("pinned") stops and pinned lines per stop.
@@ -124,6 +143,33 @@ module Favorites {
             }
         }
         return false;
+    }
+
+    // Reorders departures so pinned lines come first (keeping time order
+    // within each partition), capped at maxOut entries.
+    function orderDeps(stopId, deps, maxOut) {
+        var pinned = pinnedLines(stopId);
+        var out = [];
+        if (pinned.size() > 0) {
+            for (var i = 0; i < deps.size(); i++) {
+                if (isPinnedLine(stopId, deps[i]["r"])) {
+                    out.add(deps[i]);
+                }
+            }
+        }
+        for (var i = 0; i < deps.size(); i++) {
+            if (pinned.size() == 0 || !isPinnedLine(stopId, deps[i]["r"])) {
+                out.add(deps[i]);
+            }
+        }
+        if (out.size() > maxOut) {
+            var trimmed = [];
+            for (var i = 0; i < maxOut; i++) {
+                trimmed.add(out[i]);
+            }
+            out = trimmed;
+        }
+        return out;
     }
 
     // Returns true if the line is now pinned.

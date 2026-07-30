@@ -1,5 +1,6 @@
 import Toybox.Lang;
 import Toybox.Communications;
+import Toybox.Time;
 
 // Client for the Transitous API (https://transitous.org), a community-run
 // MOTIS instance aggregating open GTFS + GTFS-RT feeds worldwide. Any other
@@ -8,41 +9,64 @@ import Toybox.Communications;
 // One instance per request: the instance holds the caller's callback until
 // the async response arrives. Callbacks are invoked as cb.invoke(result, err)
 // where exactly one of the two is null.
+//
+// Departure dictionaries produced by this client:
+//   r   route short name        h    headsign
+//   e   departure epoch (UTC)   rt   realtime flag
+//   m   mode (BUS, TRAM, ...)   sid  stop id
+//   sn  stop name               sla/slo  stop lat/lon
 (:background)
 class ApiClient {
-    const USER_AGENT = "TransitWatch-Garmin/0.1 (+https://github.com/cholmes/transit-watch)";
+    const USER_AGENT = "Departures-Garmin/0.1 (+https://github.com/cholmes/transit-watch)";
+
+    // MOTIS versions endpoints independently; stoptimes is v6 in current
+    // MOTIS. If the server 404s (older deployment), we retry once on v1.
+    const STOPTIMES_PATH = "/api/v6/stoptimes";
+    const STOPTIMES_FALLBACK_PATH = "/api/v1/stoptimes";
 
     var _cb;
+    var _params;
+    var _retried = false;
 
     function initialize() {
     }
 
-    // Nearby stops for a lat/lon -> [{id, n, la, lo}]
-    function nearbyStops(lat, lon, cb) {
+    // Free-text stop search -> [{id, n, la, lo}]. loc biases results.
+    function searchStops(text, loc, cb) {
         _cb = cb;
-        request("/api/v1/reverse-geocode", {
-            "place" => lat.format("%.5f") + "," + lon.format("%.5f"),
-            "type" => "STOP"
-        }, method(:onStopsResponse));
-    }
-
-    // Free-text stop search -> [{id, n, la, lo}]
-    function searchStops(text, cb) {
-        _cb = cb;
-        request("/api/v1/geocode", {
+        var params = {
             "text" => text,
             "type" => "STOP"
-        }, method(:onStopsResponse));
+        };
+        if (loc != null) {
+            params["place"] = fmtPlace(loc[0], loc[1]);
+        }
+        request("/api/v1/geocode", params, method(:onStopsResponse));
     }
 
-    // Next departures for a stop -> [{r, h, e, rt}] sorted by time.
-    //   r: route short name, h: headsign, e: epoch seconds, rt: realtime flag
+    // All departures around a coordinate -> [departure dicts].
+    function nearbyTimes(lat, lon, radiusM, n, cb) {
+        _cb = cb;
+        _params = {
+            "center" => fmtPlace(lat, lon),
+            "radius" => radiusM,
+            "n" => n
+        };
+        request(STOPTIMES_PATH, _params, method(:onTimesResponse));
+    }
+
+    // Next departures for one stop -> [departure dicts].
     function stopTimes(stopId, n, cb) {
         _cb = cb;
-        request("/api/v1/stoptimes", {
+        _params = {
             "stopId" => stopId,
             "n" => n
-        }, method(:onTimesResponse));
+        };
+        request(STOPTIMES_PATH, _params, method(:onTimesResponse));
+    }
+
+    function fmtPlace(lat, lon) {
+        return lat.format("%.5f") + "," + lon.format("%.5f");
     }
 
     function request(path, params, handler) {
@@ -79,6 +103,11 @@ class ApiClient {
     }
 
     function onTimesResponse(code, data) {
+        if (code == 404 && !_retried) {
+            _retried = true;
+            request(STOPTIMES_FALLBACK_PATH, _params, method(:onTimesResponse));
+            return;
+        }
         if (code != 200 || data == null || !(data instanceof Dictionary)) {
             _cb.invoke(null, "Error " + code);
             return;
@@ -88,6 +117,8 @@ class ApiClient {
             _cb.invoke(null, "Bad response");
             return;
         }
+        var hideTrains = Cfg.hideTrains();
+        var cutoff = Time.now().value() - 60;
         var out = [];
         for (var i = 0; i < stopTimes.size(); i++) {
             var st = stopTimes[i];
@@ -103,15 +134,19 @@ class ApiClient {
                 when = place["scheduledDeparture"];
             }
             var epoch = Iso.toEpoch(when);
-            if (epoch == null) {
+            if (epoch == null || epoch < cutoff) {
+                continue;
+            }
+            var mode = st["mode"];
+            if (mode == null) {
+                mode = "TRANSIT";
+            }
+            if (hideTrains && isTrain(mode)) {
                 continue;
             }
             var route = st["routeShortName"];
             if (route == null) {
-                route = st["mode"];
-            }
-            if (route == null) {
-                route = "?";
+                route = mode;
             }
             var headsign = st["headsign"];
             if (headsign == null) {
@@ -121,9 +156,19 @@ class ApiClient {
                 "r" => route,
                 "h" => headsign,
                 "e" => epoch,
-                "rt" => (st["realTime"] == true)
+                "rt" => (st["realTime"] == true),
+                "m" => mode,
+                "sid" => place["stopId"],
+                "sn" => place["name"],
+                "sla" => place["lat"],
+                "slo" => place["lon"]
             });
         }
         _cb.invoke(out, null);
+    }
+
+    function isTrain(mode) {
+        return mode.find("RAIL") != null || mode.equals("LONG_DISTANCE")
+            || mode.equals("RAIL");
     }
 }
