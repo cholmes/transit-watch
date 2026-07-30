@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<iq:manifest xmlns:iq="http://www.garmin.com/xml/connectiq" version="3">
+    <iq:application entry="TransitWatchApp" id="7a2c9f04e1b84d3a9c6f5e8b2d4a7c19"
+                    launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0"
+                    name="@Strings.AppName" type="watchapp" version="0.1.0">
+        <iq:products>
+            <iq:product id="fr970"/>
+            <iq:product id="fr965"/>
+            <iq:product id="fr955"/>
+            <iq:product id="fr265"/>
+            <iq:product id="fr265s"/>
+            <iq:product id="fr165"/>
+            <iq:product id="fenix7"/>
+            <iq:product id="fenix7s"/>
+            <iq:product id="fenix7x"/>
+            <iq:product id="epix2"/>
+            <iq:product id="venu2"/>
+            <iq:product id="venu2s"/>
+            <iq:product id="venu2plus"/>
+            <iq:product id="venu3"/>
+            <iq:product id="venu3s"/>
+            <iq:product id="vivoactive5"/>
+        </iq:products>
+        <iq:permissions>
+            <iq:uses-permission id="Communications"/>
+            <iq:uses-permission id="Positioning"/>
+            <iq:uses-permission id="Background"/>
+        </iq:permissions>
+        <iq:languages>
+            <iq:language>eng</iq:language>
+        </iq:languages>
+        <iq:barrels/>
+    </iq:application>
+</iq:manifest>

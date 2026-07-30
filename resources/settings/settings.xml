@@ -1,0 +1,14 @@
+<settings>
+    <setting propertyKey="@Properties.alertMinutes" title="@Strings.SettingAlertMinutes">
+        <settingConfig type="numeric" min="1" max="60"/>
+    </setting>
+    <setting propertyKey="@Properties.refreshSeconds" title="@Strings.SettingRefreshSeconds">
+        <settingConfig type="numeric" min="15" max="300"/>
+    </setting>
+    <setting propertyKey="@Properties.maxDepartures" title="@Strings.SettingMaxDepartures">
+        <settingConfig type="numeric" min="3" max="15"/>
+    </setting>
+    <setting propertyKey="@Properties.apiBase" title="@Strings.SettingApiBase">
+        <settingConfig type="alphaNumeric"/>
+    </setting>
+</settings>

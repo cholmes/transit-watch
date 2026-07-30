@@ -1,0 +1,6 @@
+<properties>
+    <property id="alertMinutes" type="number">6</property>
+    <property id="refreshSeconds" type="number">30</property>
+    <property id="maxDepartures" type="number">10</property>
+    <property id="apiBase" type="string">https://api.transitous.org</property>
+</properties>

@@ -1,0 +1,5 @@
+project.manifest = manifest.xml
+
+# Hand-written project without a CI type-check pass yet; keep the type checker
+# permissive so device-specific builds don't fail on annotations.
+project.typecheck = 0
